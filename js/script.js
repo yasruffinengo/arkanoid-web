@@ -6,22 +6,32 @@ var ctx = canvas.getContext('2d');
 canvas.width = 448;
 canvas.height = 400;
 
-/* variables */
-//var counter = 0
-
-/* variables de la pelota*/
+/* VARIABLES DE LA PELOTA */
 var ballRadius = 10;
 
-var x = canvas.width / 2; //asi se mueve en diagonal
+//coordenadas. 
+//indican la posicion
+var x = canvas.width / 2; 
 var y = canvas.height - 30;
 
 // velocidad de la pelota = 
-//indica cuanto se mueve en cada frame
-var dx = 2; // a mayor numero va mas rapido
-var dy = -2; // misma velocidad, para arriba
+//indica cuantos px se mueve en cada frame
+var dx = 2; // + derecha, - izquierda 
+var dy = -2; // + abajo, - arriba
 
 
+/* VARIABLES DE LA PALETA */
+var paddleHeight = 10;
+var paddleWidth = 50;
 
+var paddleX = (canvas.width - paddleWidth) / 2;
+var paddleY = canvas.height - paddleHeight - 10;
+
+var rightPressed = false;
+var leftPressed = false;
+
+
+/* DIBUJAR */
 function drawBall(){
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -30,10 +40,25 @@ function drawBall(){
     ctx.closePath(); // esto? 
 }
 
-function drawPaddle() {}
+function drawPaddle() {
+    ctx.fillStyle = '#09f';
+    ctx.fillRect(
+        paddleX,
+        paddleY,
+        paddleWidth,
+        paddleHeight
+    );
+    
+}
+
+
 function drawBricks() {}
 
+/* COMPORTAMIENTOS / MOVIMIENTOS */
+
 function collisionDetection(){}
+
+/* MOVIMIENTO PELOTA */
 function ballMovement(){
     // rebotar la pelota en los laterales
     //si choca un lateral, cambia el sentido
@@ -41,7 +66,7 @@ function ballMovement(){
         x + dx >= canvas.width - ballRadius || //pared derecha
         x + dx <= ballRadius //pared izquierda
     ) {
-        dx = -dx
+        dx = -dx;
     }
 
     // rebotar en la parte de arriba
@@ -51,21 +76,55 @@ function ballMovement(){
 
     //la pelota toca el suelo = se pierde
     if (y + dy >= canvas.height - ballRadius){
-        console.log('Game Over')
-        document.location.reload()
+            dy = -dy;
+        //console.log('Game Over');
+        //document.location.reload();
     }
 
     x += dx;
     y += dy;
 }
 
-function paddleMovement(){}
+/* MOVIMIENTO PALETA */
+function paddleMovement(){
+    if(rightPressed){
+        paddleX += 7;
+    } else if (leftPressed) {
+        paddleX -= 7;
+    }
+}
+
+
 function cleanCanvas(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
+
+/* EVENTOS TECLAS */
+function initEvents(){
+    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keyup', keyUpHandler);
+
+    function keyDownHandler(event){
+        var key = event.key ;
+        if (key === 'Right' || key ==='ArrowRight'){
+            rightPressed = true;
+        } else if (key === 'Left' || key === 'ArrowLeft' ){
+            leftPressed = true;
+        }
+    }
+    function keyUpHandler(event){
+        var key = event.key ;
+        if (key === 'Right' || key ==='ArrowRight'){
+            rightPressed = false;
+        } else if (key === 'Left' || key === 'ArrowLeft' ){
+            leftPressed = false;
+        }
+    }
+}
+
 function draw(){
     cleanCanvas();
-    // dibujo elementos
+    /* LLAMO DIBUJOS */
     drawBall();
     drawPaddle();
     drawBricks();
@@ -76,8 +135,10 @@ function draw(){
     ballMovement();
     paddleMovement();
 
-    //aca hago dibujos y checks de colisiones
+    //ejecuta muchas veces la funcion
+    //se va formando el "video"
     window.requestAnimationFrame(draw);
 }
+initEvents();
 draw();
 
