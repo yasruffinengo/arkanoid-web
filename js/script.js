@@ -3,11 +3,13 @@
 var canvas = document.querySelector("#canvas");
 var ctx = canvas.getContext('2d');
 
+var sprite = document.querySelector("#sprite")
+
 canvas.width = 448;
 canvas.height = 400;
 
 /* VARIABLES DE LA PELOTA */
-var ballRadius = 10;
+var ballRadius = 5;
 
 //coordenadas. 
 //indican la posicion
@@ -30,6 +32,7 @@ var paddleY = canvas.height - paddleHeight - 10;
 var rightPressed = false;
 var leftPressed = false;
 
+var PADDLE_SENSITIVITY = 3;
 
 /* DIBUJAR */
 function drawBall(){
@@ -41,13 +44,23 @@ function drawBall(){
 }
 
 function drawPaddle() {
-    ctx.fillStyle = '#09f';
+
+    // primera paletita q hice jeje
+    /*ctx.fillStyle = '#09f';
     ctx.fillRect(
         paddleX,
         paddleY,
         paddleWidth,
         paddleHeight
+    );*/
+
+    ctx.drawImage(
+        sprite,
+        629, 350, 165, 45, // sprite
+        paddleX, paddleY, //canvas
+        paddleWidth, paddleHeight
     );
+
     
 }
 
@@ -60,37 +73,57 @@ function collisionDetection(){}
 
 /* MOVIMIENTO PELOTA */
 function ballMovement(){
+    // la pelota toca la paleta
+    var isBallSameXAsPaddle =
+        x + ballRadius > paddleX &&
+        x - ballRadius < paddleX + paddleWidth;
+    
+    var isBallTouchingPaddle =
+        y + ballRadius + dy >= paddleY &&
+        y + ballRadius <= paddleY + paddleHeight;
+
     // rebotar la pelota en los laterales
-    //si choca un lateral, cambia el sentido
-    if ( 
-        x + dx >= canvas.width - ballRadius || //pared derecha
-        x + dx <= ballRadius //pared izquierda
+    //si choca, cambia el sentido
+    if (
+        x + dx >= canvas.width - ballRadius ||
+        x + dx <= ballRadius
     ) {
         dx = -dx;
     }
 
-    // rebotar en la parte de arriba
-    if (y + dy  <= ballRadius){
+    // Techo
+    if (y + dy <= ballRadius) {
         dy = -dy;
     }
 
-    //la pelota toca el suelo = se pierde
-    if (y + dy >= canvas.height - ballRadius){
-            dy = -dy;
-        //console.log('Game Over');
-        //document.location.reload();
+    // Paleta: solamente cuando la pelota está bajando
+    if (
+        dy > 0 &&
+        isBallSameXAsPaddle &&
+        isBallTouchingPaddle
+    ) {
+        dy = -dy;
+    } else if (y + dy >= canvas.height - ballRadius) {
+        console.log("Game over");
+        document.location.reload();
     }
 
     x += dx;
     y += dy;
 }
 
-/* MOVIMIENTO PALETA */
+/* MOVIMIENTO y LIMITE DE LA PALETA */
 function paddleMovement(){
-    if(rightPressed){
-        paddleX += 7;
-    } else if (leftPressed) {
-        paddleX -= 7;
+    if(
+        rightPressed && 
+        paddleX < canvas.width - paddleWidth
+    ){
+        paddleX += PADDLE_SENSITIVITY;
+    } else if (
+        leftPressed && 
+        paddleX > 0
+    ) {
+        paddleX -= PADDLE_SENSITIVITY;
     }
 }
 
