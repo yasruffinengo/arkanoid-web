@@ -34,6 +34,43 @@ var leftPressed = false;
 
 var PADDLE_SENSITIVITY = 3;
 
+/* VARIABLES DE LOS LADRILLOS */
+// cantidad filas y columnas
+var brickRowCount = 6;
+var brickColumnCount = 13;
+//ancho y alto de c/ brick
+var brickWidth = 30;
+var brickHeight = 14;
+//separacion entre bricks
+var brickPadding = 2;
+//separacion con los limites del jueguito
+var brickOffsetTop = 80;
+var brickOffsetLeft = 18;
+var bricks = []
+
+var BRICK_STATUS = {
+    ACTIVE: 1,
+    DESTROYED: 0
+}
+
+for (let c = 0 ; c < brickColumnCount; c++){
+    bricks[c] = []; //inicializo con array vacio
+    for (let r = 0; r < brickRowCount; r++){
+        //calculo la posicion del ladrillo en la pantalla
+        var brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+        var brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+        // asigno un color
+        var random = Math.floor(Math.random() * 8)
+        //guardo la info de cada ladrillo
+        bricks[c][r] = {
+            x: brickX,
+            y: brickY,
+            status: BRICK_STATUS.ACTIVE,
+            color: random
+        }
+    }
+}
+
 /* DIBUJAR */
 function drawBall(){
     ctx.beginPath();
@@ -65,7 +102,28 @@ function drawPaddle() {
 }
 
 
-function drawBricks() {}
+function drawBricks() {
+    for (let c = 0 ; c < brickColumnCount; c++){
+        for (let r = 0; r < brickRowCount; r++){
+            var currentBrick = bricks[c][r];
+            if (currentBrick.status === BRICK_STATUS.DESTROYED)
+            continue;
+            
+            ctx.fillStyle = 'yellow'
+            ctx.rect(
+                currentBrick.x,
+                currentBrick.y,
+                brickWidth,
+                brickHeight
+            )
+            ctx.strokeStyle = '#000'
+            ctx.stroke();
+            ctx.fill()
+
+
+        }
+    }
+}
 
 /* COMPORTAMIENTOS / MOVIMIENTOS */
 
