@@ -8,6 +8,8 @@ var sprite = document.querySelector("#sprite")
 canvas.width = 448;
 canvas.height = 400;
 
+var level = 1;
+
 /* VARIABLES DE LA PELOTA */
 var ballRadius = 5;
 
@@ -53,20 +55,41 @@ var BRICK_STATUS = {
     DESTROYED: 0
 }
 
-for (let c = 0 ; c < brickColumnCount; c++){
-    bricks[c] = []; //inicializo con array vacio
-    for (let r = 0; r < brickRowCount; r++){
-        //calculo la posicion del ladrillo en la pantalla
-        var brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-        var brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-        // asigno un color
-        var random = Math.floor(Math.random() * 8)
-        //guardo la info de cada ladrillo
-        bricks[c][r] = {
-            x: brickX,
-            y: brickY,
-            status: BRICK_STATUS.ACTIVE,
-            color: random
+function getBrickColor(row) {
+
+    if (level === 1) {
+        return row % 2;
+    }
+
+    if (level === 2) {
+        return row % 3;
+    }
+
+    return 0;
+}
+
+function createBricks() {
+
+    bricks = [];
+
+    for (var c = 0; c < brickColumnCount; c++) {
+
+        bricks[c] = [];
+
+        for (var r = 0; r < brickRowCount; r++) {
+
+            var brickX =
+                c * (brickWidth + brickPadding) + brickOffsetLeft;
+
+            var brickY =
+                r * (brickHeight + brickPadding) + brickOffsetTop;
+
+            bricks[c][r] = {
+                x: brickX,
+                y: brickY,
+                status: BRICK_STATUS.ACTIVE,
+                color: getBrickColor(r)
+            };
         }
     }
 }
@@ -103,23 +126,31 @@ function drawPaddle() {
 
 
 function drawBricks() {
+
+    var brickSpriteY = [
+    102, // rosa
+    324, // azul
+    398  // verde
+    ];
     for (let c = 0 ; c < brickColumnCount; c++){
         for (let r = 0; r < brickRowCount; r++){
             var currentBrick = bricks[c][r];
             if (currentBrick.status === BRICK_STATUS.DESTROYED)
             continue;
             
-            ctx.fillStyle = 'yellow'
-            ctx.rect(
+            ctx.drawImage(
+                sprite,
+
+                21,
+                brickSpriteY[currentBrick.color],
+                130,
+                56,
+
                 currentBrick.x,
                 currentBrick.y,
                 brickWidth,
                 brickHeight
-            )
-            ctx.strokeStyle = '#000'
-            ctx.stroke();
-            ctx.fill()
-
+            );
 
         }
     }
@@ -127,7 +158,28 @@ function drawBricks() {
 
 /* COMPORTAMIENTOS / MOVIMIENTOS */
 
-function collisionDetection(){}
+function collisionDetection(){
+    for (let c = 0 ; c < brickColumnCount; c++){
+        for (let r = 0; r < brickRowCount; r++){
+            var currentBrick = bricks[c][r];
+            if (currentBrick.status === BRICK_STATUS.DESTROYED)
+                continue;
+            var isBallSameXAsBrick = 
+            x > currentBrick.x &&
+            x < currentBrick.x + brickWidth;
+
+            var isBallSameYAsBrick = 
+            y > currentBrick.y &&
+            y < currentBrick.y + brickHeight;
+
+            if (isBallSameXAsBrick && isBallSameYAsBrick) {
+                dy = -dy;
+                currentBrick.status = BRICK_STATUS.DESTROYED;
+            }
+        }
+    }
+            
+}
 
 /* MOVIMIENTO PELOTA */
 function ballMovement(){
@@ -230,6 +282,7 @@ function draw(){
     //se va formando el "video"
     window.requestAnimationFrame(draw);
 }
+createBricks(); 
 initEvents();
 draw();
 
